@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homograph Attack Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #0d1117; /* Đen xám đậm, nền tối */
+            color: #c9d1d9; /* Xám nhạt sáng cho chữ */
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: #161b22; /* Xám đen đậm cho container */
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Shadow tối */
+        }
+        h2 {
+            margin: 0 0 20px;
+            font-size: 24px;
+            font-weight: 600;
+            color: #58a6ff; /* Xanh tím sáng cho tiêu đề */
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #30363d; /* Viền xám đậm */
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #0d1117; /* Nền input tối */
+            color: #c9d1d9; /* Chữ sáng */
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #8b5cf6; /* Tím neon khi focus */
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.4); /* Hiệu ứng focus tím */
+        }
+        button {
+            padding: 12px 24px;
+            background-color: #8b5cf6; /* Tím neon Aura Dark */
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #7c3aed; /* Tím đậm hơn khi hover */
+        }
+        .results {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border-top: 1px solid #30363d; /* Đường viền xám đậm */
+            padding-top: 10px;
+        }
+        .result-item {
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 4px;
+            background: #21262d; /* Xám đen nhạt cho kết quả */
+            margin-bottom: 8px;
+            color: #c9d1d9; /* Chữ sáng */
+            word-break: break-all;
+        }
+        .result-item:hover {
+            background: #30363d; /* Xám đậm hơn khi hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Homograph Attack Generator</h2>
+        <div class="input-group">
+            <input type="text" id="domainInput" placeholder="Enter domain (e.g., vsec.com)">
+            <button onclick="generateHomographs()">Generate</button>
+        </div>
+        <div class="results" id="resultList"></div>
+    </div>
+
+    <script>
+        const HOMOGLYPH_MAP = {
+            "v": ["v"],
+            "s": ["s", "𝓈", "ѕ"],
+            "e": ["e", "е", "ℯ", "ҽ", "𝑒"],
+            "c": ["c", "𝑐", "с"],
+            ".": [".", "․"]
+        };
+
+        function generateHomographs() {
+            let domain = document.getElementById("domainInput").value.trim().toLowerCase();
+            if (!domain) return;
+            
+            let [main, tld] = domain.split(".");
+            let variations = main.split('').map(char => HOMOGLYPH_MAP[char] || [char]);
+            let results = cartesianProduct(variations).map(v => v.join('') + '.' + tld);
+
+            let resultList = document.getElementById("resultList");
+            resultList.innerHTML = ""; // Xóa kết quả cũ
+            results.forEach(domain => {
+                let div = document.createElement("div");
+                div.className = "result-item";
+                div.textContent = domain;
+                resultList.appendChild(div);
+            });
+
+            document.getElementById("domainInput").value = ""; // Clear input
+        }
+
+        function cartesianProduct(arr) {
+            return arr.reduce((a, b) => a.flatMap(d => b.map(e => [d, e].flat())));
+        }
+
+        document.getElementById("domainInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                generateHomographs();
+            }
+        });
+    </script>
+</body>
+</html>
