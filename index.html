@@ -110,7 +110,7 @@
     <div class="container">
         <h2>Homograph Attack Generator</h2>
         <div class="input-group">
-            <input type="text" id="domainInput" placeholder="Enter domain (e.g., semrush.com)">
+            <input type="text" id="domainInput" placeholder="Enter text (e.g., semrush)">
             <button onclick="generateHomographs()">Generate</button>
         </div>
         <div class="results" id="resultList"></div>
@@ -152,19 +152,28 @@
             ".": [".", "․"]
         };
         function generateHomographs() {
-            let domain = document.getElementById("domainInput").value.trim().toLowerCase();
-            if (!domain) return;
+            let input = document.getElementById("domainInput").value.trim().toLowerCase();
+            if (!input) return; // Only check if input is empty
             
-            let [main, tld] = domain.split(".");
-            let variations = main.split('').map(char => HOMOGLYPH_MAP[char] || [char]);
-            let results = cartesianProduct(variations).map(v => v.join('') + '.' + tld);
+            let lastDotIndex = input.lastIndexOf('.');
+            let base = input;
+            let tld = '';
+            
+            // If there's a dot, split into base and tld
+            if (lastDotIndex !== -1) {
+                base = input.substring(0, lastDotIndex);
+                tld = input.substring(lastDotIndex);
+            }
+            
+            let variations = base.split('').map(char => HOMOGLYPH_MAP[char] || [char]);
+            let results = cartesianProduct(variations).map(v => v.join('') + tld);
 
             let resultList = document.getElementById("resultList");
             resultList.innerHTML = "";
-            results.forEach(domain => {
+            results.forEach(result => {
                 let div = document.createElement("div");
                 div.className = "result-item";
-                div.textContent = domain;
+                div.textContent = result;
                 resultList.appendChild(div);
             });
 
